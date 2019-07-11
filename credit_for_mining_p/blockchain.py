@@ -243,11 +243,18 @@ blockchain = Blockchain()
 
 @app.route('/mine', methods=['POST'])
 def mine():
+    values = request.get_json()
+    print("/mine POST values", values)
+    # Check that the required fields are in the POST'ed data
+    required = ['proof', 'id']
+    if not all(k in values for k in required):
+        return 'Missing Proof or Address', 400
+
     # Determine if proof is valid
     last_block = blockchain.last_block
     last_proof = last_block['proof']
 
-    values = request.get_json()
+    # values = request.get_json()
     submitted_proof = values.get('proof')
 
     if blockchain.valid_proof(last_proof, submitted_proof):
@@ -255,7 +262,7 @@ def mine():
         # The sender is "0" to signify that this node has mine a new coin
         blockchain.new_transaction(
             sender="0",
-            recipient=node_identifier,
+            recipient=values['id'],
             amount=1,
         )
 

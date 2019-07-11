@@ -1,7 +1,21 @@
 import hashlib
 import requests
+from uuid import uuid4
 
 import sys
+
+# Creates a new address if one does not exist
+with open('my_id.txt', 'a+') as f:
+    f.seek(0)
+    address = f.read()
+
+    print("len(address)", len(address), address)
+    if len(address) is 0:
+        address = str(uuid4()).replace('-', '')
+        f.write(address)
+    
+    print("address", address)
+    f.closed
 
 
 def proof_of_work(last_proof):
@@ -46,7 +60,7 @@ if __name__ == '__main__':
         data = r.json()
         new_proof = proof_of_work(data.get('proof'))
 
-        post_data = {"proof": new_proof}
+        post_data = {"proof": new_proof, "id": address}
 
         r = requests.post(url=node + "/mine", json=post_data)
         data = r.json()
