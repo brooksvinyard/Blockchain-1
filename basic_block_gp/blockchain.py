@@ -12,7 +12,7 @@ class Blockchain(object):
         self.current_transactions = []
         self.nodes = set()
 
-        self.new_block(previous_hash=1, proof=100)
+        self.new_block(previous_hash=1, proof=99) # Create the genesis block
 
     def new_block(self, proof, previous_hash=None):
         """
@@ -82,7 +82,11 @@ class Blockchain(object):
         - p is the previous proof, and p' is the new proof
         """
 
-        pass
+        proof = 0
+        while self.valid_proof(last_proof, proof) is False:
+            proof += 1
+        
+        return proof
 
     @staticmethod
     def valid_proof(last_proof, proof):
@@ -90,8 +94,10 @@ class Blockchain(object):
         Validates the Proof:  Does hash(last_proof, proof) contain 4
         leading zeroes?
         """
-        # TODO
-        pass
+        guess = f'{last_proof}{proof}'.encode()
+        guess_hash = hashlib.sha256(guess).hexdigest()
+
+        return guess_hash[:4] == "0000" # First 4 are zeros
 
     def valid_chain(self, chain):
         """
@@ -149,11 +155,13 @@ def mine():
 
     # Send a response with the new block
     response = {
-        'message': "New Block Forged",
-        'index': block['index'],
-        'transactions': block['transactions'],
-        'proof': block['proof'],
-        'previous_hash': block['previous_hash'],
+        # 'message': "New Block Forged",
+        # 'index': block['index'],
+        # 'transactions': block['transactions'],
+        # 'proof': block['proof'],
+        # 'previous_hash': block['previous_hash'],
+
+        'proof': proof
     }
     return jsonify(response), 200
 
@@ -180,6 +188,8 @@ def new_transaction():
 def full_chain():
     response = {
         # TODO: Return the chain and its current length
+        'currentChain': blockchain.chain,
+        'length': len(blockchain.chain)
     }
     return jsonify(response), 200
 
